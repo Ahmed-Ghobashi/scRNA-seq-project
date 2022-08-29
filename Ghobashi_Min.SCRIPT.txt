@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#SBATCH -J Ghobashi
+#SBATCH -p gpu
+#SBATCH -o Ghobashi_%j.txt
+#SBATCH -e Ghobashi_%j.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=aghobash@iu.edu
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=6
+#SBATCH --gpus-per-node=2
+#SBATCH --time=12:00:00
+
+cd /N/project/OHagan_single_cell/BL_Chrm_015_OHagan_scRNA2_Aprl2022/BL_Chrm_015_OHagan_scRNA2_Aprl2022/
+export PATH=/N/slate/aghobash/opt/cellranger-6.1.2:$PATH
+cellranger count --id Min --fastqs Chrm_015_OHagan_Min --sample Min --transcriptome /N/slate/aghobash/opt/refdata-gex-mm10-2020-A
