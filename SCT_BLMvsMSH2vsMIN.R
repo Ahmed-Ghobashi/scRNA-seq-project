@@ -1,5 +1,5 @@
 #####all of this script is performed on the supercomputer 
-###/N/slate/aghobash/R-project
+
 
 library("Seurat")
 library(SeuratWrappers)
@@ -79,7 +79,7 @@ saveRDS(Min_BLM_MSH2,"SCT_Min_BLM_MSH2.RDS")
 # dataset using these features
 SCT_Min_BLM_MSH2<-readRDS("SCT_Min_BLM_MSH2.RDS")
 
-#### Prepare for integration. using supercomputer
+#### Prepare for integration
 
 features <- SelectIntegrationFeatures(object.list = SCT_Min_BLM_MSH2, nfeatures = 3000)
 SCT_Min_BLM_MSH2 <- PrepSCTIntegration(object.list = SCT_Min_BLM_MSH2, 
@@ -109,15 +109,13 @@ SCT_Min_BLM_MSH2.combined <- IntegrateData(anchorset = SCT_Min_BLM_MSH2.anchors,
 SCT_Min_BLM_MSH2.combined <- RunPCA(Min_BLM_MSH2.combined, npcs = 100)
 
 saveRDS(SCT_Min_BLM_MSH2.combined,"SCT_Min_BLM_MSH2.combined.RDS")
-###doing the cluster computer
-##doing the elbowplot
 
 SCT_Min_BLM_MSH2.combined<-readRDS(file="SCT_Min_BLM_MSH2.combined.RDS")
 
 p <- ElbowPlot(SCT_Min_BLM_MSH2.combined, ndims = 100)#the variation is high till almost 75
 
 pdf("ElbowPlot.pdf")
-ElbowPlot(SCT_Min_BLM_MSH2.combined, ndims = 100)
+p
 dev.off()
 
 ## UMAP dimension reduction for visualization.
@@ -135,10 +133,7 @@ SCT_Min_BLM_MSH2.combined  <- FindNeighbors(SCT_Min_BLM_MSH2.combined , dims = 1
 #Determine the clusters for various resolutions 
 SCT_Min_BLM_MSH2.combined  <- FindClusters(SCT_Min_BLM_MSH2.combined ,
                                      resolution = c(0.2,0.4, 0.6, 0.8, 1.0)),
-                                     algorithm = 4, 
-                                     method = "igraph"
-                                     )
-
+                                     
 
 
 
@@ -152,10 +147,10 @@ pdf(file="sct_cluster-tree_4conditions.pdf", height= 12,width=9)
 p2
 dev.off()
 
-# Assign identity of clusters 0.5
-Idents(object = SCT_Min_BLM_MSH2.combined) <- "integrated_snn_res.0.4"
+# Assign identity of clusters 
+Idents(object = SCT_Min_BLM_MSH2.combined) <- "integrated_snn_res.0.2"
 
-Idents(object = Min_BLM_MSH2.combined) <- "integrated_snn_res.0.4"
+Idents(object = Min_BLM_MSH2.combined) <- "integrated_snn_res.0.2"
 
 
 
@@ -203,19 +198,13 @@ macrophage<-c("Gpr18","Fpr2","Egr2","Mgl2","Fcgr1","Fgl2","Tgfbr1","Cd68","Itgam
               "Arg1","Chil3","Folr2","Adgre1","Ms4a7")
 B_cells<-c("Ms4a1","Ighd","Cd22").
 
-#doing Reg3b, Reg3a genes
+###visualizing gene expression in different cluster by featureplot
 
-P3<-FeaturePlot(SCT_Min_BLM_MSH2.combined, features = B_cells,
+FeaturePlot(SCT_Min_BLM_MSH2.combined, features = B_cells,
                 pt.size = 0.3, split.by = "orig.ident"
 )& theme(legend.position = c(0.0,0.2))
 
 
-
-pdf(file=" SCT_B_cells.pdf", height= 50,width=15)
-P3
-dev.off()
-
-, height= 110,width=15
 
 ##removing doublets on cluster computer
 
@@ -310,20 +299,6 @@ dev.off()
 SCT_Seurat_integrated<-PrepSCTFindMarkers(SCT_Seurat_integrated, 
                                           assay = "SCT", verbose = TRUE)
 
-
-
-goblet<-c("Tff3","Reg4","Muc2","Spdef","Atoh1","muc13","Galnt12","Fcgbp","Muc4",
-          "Rep15","Guca2a")
-
-P3<-FeaturePlot(SCT_Seurat_integrated, features = goblet,
-                pt.size = 0.3, split.by = "orig.ident"
-)& theme(legend.position = c(0.0,0.2))
-
-
-
-pdf(file=" SCT_test.pdf", height= 90,width=25)
-P3
-dev.off()
 
 SCT_Seurat_integrated1<-readRDS("SCT_Seurat_integrated.RDS")
 
@@ -465,124 +440,6 @@ z
 dev.off()
 
 
-8888888888******************************************************************8
-###reducing the resolution from 0.2 to 0.4
-
-###genertating the marker list
-# Assign identity of clusters 0.4
-
-SCT_Seurat_integrated1<-readRDS("SCT_Seurat_integrated1.RDS")
-
-Idents(object = SCT_Seurat_integrated1) <- "integrated_snn_res.0.4"
-
-##visualize the data
-
-p3<-DimPlot(SCT_Seurat_integrated1, split.by = "orig.ident",label=TRUE)
-
-pdf(file="sct_cluster_4conditions_res0.4_number.pdf", height= 15,width=20)
-p3
-dev.off()
-
-###generating marker at this resolutions
-DefaultAssay(SCT_Seurat_integrated1)<-"SCT"
-
-
-
-#*******Find Markers********************
-
-
-
-markers_Res0.4 <- FindAllMarkers(SCT_Seurat_integrated1, assay = "SCT",
-                           slot = "data", min.pct = 0.25,return.thresh = 0.05,
-                           logfc.threshold = log(1),recorrect_umi=FALSE)
-
-saveRDS(markers_Res0.4,  "markers_Res0.4.RDS")
-
-saveRDS(SCT_Seurat_integrated1,  "SCT_Seurat_integrated1.RDS")
-
-##visualize the data
-markers_Res0.4<-readRDS("markers_Res0.4.RDS")
-tail(markers_Res0.4)
-
-str(markers_Res0.4)
-
-##convert it to data.table 
-library("data.table")
-library("stringr")
-
-setDT(markers_Res0.4)#to convert it to data.table
-
-## Load and prepare marker list.
-
-markers_Res0.4_1 <- markers_Res0.4[p_val_adj < 0.05]
-markers_Res0.4_1[, c("avg_log2FC", "cluster") := list(log2(exp(avg_log2FC)), str_c("cluster_", cluster))]
-markers_Res0.4_1 <- markers_Res0.4_1[order(cluster, -avg_log2FC)]
-
-
-## Split the list based on cluster and save results.
-
-markers_Res0.4_1<- split(markers_Res0.4_1, markers_Res0.4_1$cluster)
-
-markers<-markers_Res0.4_1######just to make it easy
-
-str(markers)
-
-
-myresults_marker<-list(markers$cluster_0,markers$cluster_1,markers$cluster_2,markers$cluster_3,markers$cluster_4,
-                       markers$cluster_5,markers$cluster_6,markers$cluster_7,markers$cluster_8,
-                       markers$cluster_9,markers$cluster_10,markers$cluster_11,markers$cluster_12,
-                       markers$cluster_13,markers$cluster_14,markers$cluster_15,markers$cluster_16,
-                       markers$cluster_17,markers$cluster_18,markers$cluster_19,
-                       markers$cluster_20,
-                       markers$cluster_21)
-myresults2<-c("cluster_0","cluster_1","cluster_2","cluster_3",
-              "cluster_4","cluster_5", "cluster_6",
-              "cluster_7","cluster_8","cluster_9",
-              "cluster_10","cluster_11","cluster_12",
-              "cluster_13","cluster_14","cluster_15",
-              "cluster_16", "cluster_17","cluster_18","cluster_19","cluster_20",
-              "cluster_21")
-
-for (i in (1:length(myresults_marker))){
-  n<-myresults_marker[[i]]
-  write.csv(n, paste0(myresults2[i],".csv"),sep='\t', 
-            quote = F, row.names = T, col.names = T) 
-}
-
-############I am not doing this one right now
-## Load and prepare marker list for genes having Log2FC more than 0.75
-
-markers2 <- markers_Res0.4[p_val_adj < 0.05 &avg_log2FC>=0.75]
-markers2[, c("avg_log2FC", "cluster") := list(log2(exp(avg_log2FC)), str_c("cluster_", cluster))]
-markers2 <- markers2[order(cluster, -avg_log2FC)]
-
-
-str(markers2)
-## Split the list based on cluster and save results.
-
-markers2<- split(markers2, markers2$cluster)
-
-str(markers2)
-markers2$`1`
-
-myresults_marker<-list(markers2$cluster_1,markers2$cluster_2,markers2$cluster_3,
-                       markers2$cluster_4,markers2$cluster_5,markers2$cluster_6,
-                       markers2$cluster_7,markers2$cluster_8,markers2$cluster_9,
-                       markers2$cluster_10,markers2$cluster_11,markers2$cluster_12,
-                       markers2$cluster_13,markers2$cluster_14,markers2$cluster_15,
-                       markers2$cluster_16,markers2$cluster_17)
-myresults2<-c("cluster_FC-1_1","cluster_FC-1_2","cluster_FC-1_3",
-              "cluster_FC-1_4","cluster_FC-1_5", "cluster_FC-1_6",
-              "cluster_FC-1_7","cluster_FC-1_8","cluster_FC-1_9",
-              "cluster_FC-1_10","cluster_FC-1_11","cluster_FC-1_12",
-              "cluster_FC-1_13","cluster_FC-1_14","cluster_FC-1_15",
-              "cluster_FC-1_16", "cluster_FC-1_17")
-
-for (i in (1:length(myresults_marker))){
-  n<-myresults_marker[[i]]
-  write.csv(n, paste0(myresults2[i],".csv"),sep='\t', 
-            quote = F, row.names = T, col.names = T) 
-}
 
 
 #### removing all of the clusters except colon and converting to loom file
@@ -592,11 +449,7 @@ saveRDS(SCT_Seurat_colon,  "SCT_Seurat_colon.RDS")
 colon.loom <- as.loom(SCT_Seurat_colon, filename = "colon.loom", verbose = FALSE)
 colon.loom$close_all()
 
-p3<-DimPlot(SCT_Seurat_colon, split.by = "orig.ident",label=TRUE)
 
-pdf(file="colon_res0.2_number1.pdf", height= 15,width=20)
-p3
-dev.off()
 
 seurat_velocity <- RunVelocity( SCT_Seurat_colon, ambiguous = "ambiguous", ncores = 1,
   deltaT = 1, kCells = 25, fit.quantile = 0.02)
