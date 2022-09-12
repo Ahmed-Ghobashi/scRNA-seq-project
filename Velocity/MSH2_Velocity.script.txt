@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#SBATCH -J Ghobashi_MSH2_velocity
+#SBATCH -p gpu
+#SBATCH -o SCT_Marker0.4_script_out.txt
+#SBATCH -e SCT_Marker0.4_script_out.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=aghobash@iu.edu
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=6
+#SBATCH --gpus-per-node=3
+#SBATCH --mem=200G
+#SBATCH --time=20:00:00
+
+source /N/u/aghobash/Carbonate/.conda/envs/Velocity
+conda activate Velocity
+cd /N/project/OHagan_single_cell/BL_Chrm_017_OHagan_scRNA2_May2022/MSH2/outs/filtered_feature_bc_matrix/
+module load samtools/1.9
+
+velocyto run -b barcodes.tsv.gz -o /N/slate/aghobash/R-projects/Velocity/MSH2_VEL /N/project/OHagan_single_cell/BL_Chrm_017_OHagan_scRNA2_May2022/MSH2/outs/possorted_genome_bam.bam /N/slate/aghobash/opt/refdata-gex-mm10-2020-A/genes/genes.gtf
